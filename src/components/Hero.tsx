@@ -91,7 +91,18 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal, featuredArticle, breakingNews 
         </div>
         
         {/* Content on the right */}
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
+          <div className="absolute right-0 top-0 flex items-center gap-3">
+            <button className="p-2 text-gray-500 hover:text-red-600 transition-colors">
+              <Heart className="w-5 h-5" />
+            </button>
+            <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+              <Bookmark className="w-5 h-5" />
+            </button>
+            <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+              <Share2 className="w-5 h-5" />
+            </button>
+          </div>
           {/* Category label (forced to Trending) */}
           <span className="text-red-600 font-semibold text-sm mb-3">
             Trending
@@ -118,17 +129,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal, featuredArticle, breakingNews 
           </div>
           
           {/* Action icons */}
-          <div className="flex items-center gap-4 mt-auto">
-            <button className="flex items-center text-gray-500 hover:text-red-600 transition-colors">
-              <Heart className="w-5 h-5" />
-            </button>
-            <button className="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
-              <Share2 className="w-5 h-5" />
-            </button>
-            <button className="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
-              <Bookmark className="w-5 h-5" />
-            </button>
-          </div>
+          
         </div>
       </div>
     </div>
