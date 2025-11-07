@@ -1,0 +1,9 @@
+# Force all text files to use LF line endings
+* text=auto eol=lf
+
+# Keep images and binaries untouched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+*.ico binary
