@@ -8,7 +8,7 @@ import NewsModal from '@/components/NewsModal';
 import useNewsModal from '@/hooks/useNewsModal';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import { getTopStories } from '@/lib/nytimes';
 import { getFeaturedArticles } from '@/lib/prismic';
 import { UnifiedArticle, adaptNYTArticle, adaptPrismicArticle, getCombinedFeaturedArticles } from '@/lib/adapters';
@@ -22,7 +22,7 @@ interface HomeProps {
   breakingNews?: UnifiedArticle;
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   try {
     // Get combined featured articles from both sources
     const featuredArticles = await getCombinedFeaturedArticles(1);
@@ -56,6 +56,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
         editorPicks,
         breakingNews,
       },
+      // Rebuild the page in the background at most once every 30 minutes
+      revalidate: 1800,
     };
   } catch (error) {
     console.error('Error fetching data for homepage:', error);
@@ -67,6 +69,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
         healthStories: [],
         editorPicks: [],
       },
+      revalidate: 1800,
     };
   }
 };

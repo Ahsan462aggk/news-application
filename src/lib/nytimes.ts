@@ -27,32 +27,47 @@ async function fetchWithCache<T>(
 async function fetchWithRetry(
   url: string,
   options?: RequestInit,
-  maxRetries: number = 3
+  maxRetries: number = 5
 ): Promise<Response> {
   let lastError: Error | null = null;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await fetch(url, options);
-      
-      // If rate limited, wait and retry
+
+      // If rate limited, respect Retry-After when present, otherwise exponential backoff with jitter
       if (response.status === 429) {
-        const waitTime = Math.pow(2, i) * 1000; // Exponential backoff: 1s, 2s, 4s
+        const retryAfterHeader = response.headers.get('retry-after');
+        let waitTime = 0;
+        if (retryAfterHeader) {
+          const parsed = Number(retryAfterHeader);
+          // Retry-After can be seconds or a HTTP-date; we only handle seconds here
+          if (!Number.isNaN(parsed)) {
+            waitTime = parsed * 1000;
+          }
+        }
+        if (!waitTime) {
+          const base = Math.pow(2, i) * 1000; // 1s, 2s, 4s, 8s, 16s
+          const jitter = Math.floor(Math.random() * 250); // up to 250ms jitter
+          waitTime = base + jitter;
+        }
         console.warn(`Rate limited. Retrying in ${waitTime}ms... (attempt ${i + 1}/${maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
         continue;
       }
-      
+
       return response;
     } catch (error) {
       lastError = error as Error;
       if (i < maxRetries - 1) {
-        const waitTime = Math.pow(2, i) * 1000;
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        const base = Math.pow(2, i) * 1000;
+        const jitter = Math.floor(Math.random() * 250);
+        const waitTime = base + jitter;
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
     }
   }
-  
+
   throw lastError || new Error('Failed to fetch after retries');
 }
 
